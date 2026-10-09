@@ -167,11 +167,12 @@ SCREENS.boot = () => '<div class="screen" style="align-items:center;justify-cont
 SCREENS.gate = () => `<div class="screen" style="min-height:90vh;justify-content:center">
   <div class="mascot" style="text-align:center">VocaQuest</div>
   <h1 class="title" style="text-align:center">Bienvenue !</h1>
-  <p class="sub" style="text-align:center">Pour commencer, saisis le code d'invitation que tu as reçu, ou colle le lien d'invitation en entier.</p>
-  <label class="lab" for="icode">Code d'invitation</label>
-  <input id="icode" class="inp" style="font-size:20px;text-align:center" data-bind="tmp.icode" value="${esc(S.tmp.icode || '')}" placeholder="ex. famille-abc123" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go">
+  <p class="sub" style="text-align:center">Crée ton profil pour commencer à jouer.</p>
   <button class="btn red" data-a="joinInvite">Commencer</button>
   <button class="btn2" data-a="nav" data-to="recover">J'ai déjà un profil sur un autre appareil</button>
+  <details class="card" ${S.tmp.icode ? 'open' : ''}><summary class="small">J'ai un code d'invitation</summary>
+    <input id="icode" class="inp" style="margin-top:8px" data-bind="tmp.icode" value="${esc(S.tmp.icode || '')}" placeholder="Code ou lien d'invitation" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go">
+  </details>
 </div>`;
 
 SCREENS.home = () => {
@@ -793,7 +794,6 @@ const A = {
     let code = (S.tmp.icode || '').trim();
     const m = code.match(/[?&]i=([^&#\s]+)/);
     if (m) code = decodeURIComponent(m[1]);
-    if (!code) { toast("Saisis le code d'invitation."); return; }
     try {
       const res = await withLoading(() => api('/profile', { body: { invite: code }, noLogout: true }));
       S.token = res.token; if (!store.set('vq_token', res.token)) S.noStorage = true;
@@ -913,12 +913,12 @@ async function boot2() {
 async function boot() {
   render();
   const params = new URLSearchParams(location.search);
-  const invite = params.get('i') || (window.VQ_DEMO && !store.get('vq_token') ? 'demo' : null);
+  const invite = params.get('i') || '';
   S.token = store.get('vq_token');
   if (store.set('vq_probe', '1')) store.del('vq_probe'); else S.noStorage = true;
   try {
-    if (!S.token && invite) {
-      const res = await api('/profile', { body: { invite } });
+    if (!S.token) {
+      const res = await api('/profile', { body: { invite }, noLogout: true });
       S.token = res.token; store.set('vq_token', res.token);
     }
     if (params.get('i')) { try { history.replaceState(null, '', location.pathname); } catch { /* bac à sable */ } }

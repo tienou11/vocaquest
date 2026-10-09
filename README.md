@@ -12,7 +12,7 @@ Application web pour apprendre le vocabulaire anglais, allemand et espagnol depu
 
 | Variable | Rôle |
 |---|---|
-| `INVITE_CODE` | code du lien d'invitation (`https://…/?i=CODE`) qui crée un profil |
+| `INVITE_CODE` | facultatif : si défini, un code d'invitation est exigé pour créer un profil (lien `https://…/?i=CODE`) ; sinon, ouvrir le site crée le profil |
 | `ADMIN_CODE` | code administrateur (dans Mon profil, ou lien `?i=ADMIN_CODE`) |
 | `MCP_SECRET` | segment secret de l'URL du connecteur Claude : `https://…/mcp/MCP_SECRET` |
 

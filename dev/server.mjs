@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 process.env.LOCAL_STORE_DIR ||= path.join(root, '.data');
-process.env.INVITE_CODE ||= 'famille';
+process.env.INVITE_CODE ??= 'famille';
 process.env.ADMIN_CODE ||= 'admin-test';
 process.env.MCP_SECRET ||= 'secret-test';
 const { handleApi } = await import('../server/http.mjs');
