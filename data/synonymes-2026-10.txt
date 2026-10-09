@@ -1,0 +1,514 @@
+C001|||||animal domestique|
+C002|||||animal domestique|
+C003|||||animal|
+C004|||||animal aquatique|
+C005|||||animal|
+C006|||||animal de ferme|
+C007|||||animal|DE : "der Hase" = le lièvre au sens strict ("lapin" seulement en usage familier ou régional)
+C008|||||animal|
+C009|||||couleur|
+C010|||||couleur|
+C011|||||couleur|
+C012|||||couleur|
+C013|||||couleur|
+C014|||||couleur|
+C015||||||
+C016|||||chiffre|
+C017|||||chiffre|
+C018|||||nombre|
+C019||||||
+C020||||||
+C021|||||famille|
+C022|||||famille|
+C023|||||relation, pas amoureuse|
+C024|||||jeune personne|
+C025|||||jeune personne, pas famille|
+C026|||||partie du corps|
+C027|||||partie du corps|
+C028|||||partie du corps|
+C029|||||partie du corps|
+C030|||||partie du corps|
+C031|||||bâtiment|
+C032|||||lieu où on apprend|
+C033|||||dans le ciel le jour|
+C034|||||dans le ciel la nuit|
+C035|||||liquide|
+C036|||||boulangerie|
+C037|||||boisson|
+C038|||||fruit|
+C039|||||taille|
+C040|||||taille|
+C041|hi||||en arrivant|
+C042|||||en partant|
+C043|||||quand on reçoit|
+C044|||||pour demander poliment|
+C045|||||réponse|
+C046|||||réponse|
+C047|||||nourriture|
+C048|||||avec un verre|
+C049|||||loisir, pas instrument|
+C050|||||au lit|
+C051|||||lecture|
+C052|||||écrit à l'encre|
+C053||||un crayon à papier|s'efface à la gomme|
+C054|||||meuble|
+C055|||||meuble|
+C056|||||pour entrer|
+C057|||||pour regarder dehors|
+C058|||||meuble pour dormir|
+C059|||||pièce de la maison|
+C060||||la chambre à coucher|pièce de la maison|
+C061||||une bicyclette|véhicule à pédales|
+C062|||||véhicule|
+C063|||||nature|
+C064|||||jardin|
+C065|||||météo|
+C066|||||météo|
+C067|||||température|
+C068|||||température|
+C069|||||produit laitier|
+C070|||||aliment|
+C071|||||viande|
+C072|||||fruit|
+C073|||||fruit|
+C074|||||sucrerie|
+C075|||||dessert|
+C076|||||vêtement|
+C077|||los pantalones||vêtement|
+C078|||||aux pieds|
+C079|||||sur la tête|
+C080|||||vêtement chaud|
+C081|||||jour de la semaine|
+C082|||||jour de la semaine|
+C083|||||calendrier|
+C084|||||calendrier, pas le matin|
+C085|||||calendrier|
+C086|||||émotion|
+C087|||||émotion|
+C088|||||état physique|
+C089|||||avec les jambes, vite|
+C090|||||en l'air|
+C091|||||dans l'eau|
+C092|||||musique|
+C093|||||un livre|
+C094|||||avec un stylo|
+C095||||observer||
+C096|||||sentiment|
+C097|||||métier, à l'école|
+C098|||||animal|
+C099|||||animal|
+C100|||||animal|
+C101|||||plus grand qu'un village|
+C102|||||en ville|
+C103||||une boutique|pour faire des achats|
+C104|||||commerce en plein air|
+C105|the train station||la estación de tren||trains|
+C106|||||avions|
+C107||||un ticket|transport|
+C108|||||sable, vacances|
+C109|||||paysage|
+C110|||||eau salée|
+C111|||||cours d'eau|
+C112||||||
+C113|||||météo|
+C114|||||dans le ciel|
+C115|||||saison|
+C116|||||saison|
+C117|||||moment de la journée|
+C118|||||moment de la journée|
+C119|||||calendrier|
+C120|||||calendrier|
+C121|||||durée|
+C122|||||repas du matin|
+C123|||||repas de midi|
+C124|||||repas du soir|
+C125|||||alimentation|
+C126|||||alimentation|
+C127|||||céréale|
+C128|||||à table|
+C129|||||à table|
+C130|||||à table|
+C131|||||commerce|
+C132|||||commerce|
+C133|||||une porte|
+C134|||||une porte|
+C135|||||objet perdu|
+C136|||||objet perdu|
+C137||||||
+C138|||||quelqu'un en difficulté|
+C139|||||comme un élève|
+C140|||||mémoire|
+C141|||||mémoire|
+C142|||||un exercice|
+C143|||||un exercice|
+C144|||||prix|
+C145|||||prix|
+C146|||||vitesse|
+C147|||||vitesse|
+C148|||||contraire de jeune|
+C149|||||contraire de vieux|
+C150|||||fréquence|
+C151|||jamás||fréquence|
+C152|||||vie professionnelle|
+C153||||||
+C154|||||au travail|
+C155|||||argent gagné au travail|
+C156|||||au travail|
+C157|||||commerce|
+C158|||||vacances|
+C159|||||voyage|
+C160||der Pass|||document de voyage|
+C161|||||voyage|
+C162|||||entre deux pays|
+C163|||||hôtel, restaurant|
+C164||||||
+C165|||||habite à côté|
+C166||||un docteur|santé|
+C167|||||médecine|
+C168|||||santé|
+C169|||||santé|
+C170|||||émotion|
+C171|||||émotion|
+C172|||||émotion|
+C173||||étonné|émotion|
+C174|to be scared|sich fürchten|||émotion|
+C175|||||match ou salaire|
+C176|||||match ou objet|
+C177||probieren||tenter|effort|
+C178|to be successful||||examen, projet|
+C179|||||faire un choix|
+C180|||||faire comprendre|
+C181|||||recevoir puis rendre|
+C182|||||donner puis récupérer|
+C183|||||avec les autres|
+C184|||||une personne, un lieu|
+C185|to hurry|||se presser|quand on est en retard|
+C186|||||vêtements, le matin|
+C187|||||ouvrir les yeux|
+C188|||||sortir du lit|
+C189|||||lumière, appareil|
+C190|||||lumière, appareil|
+C191|||||informatique|
+C192|||||ordinateur, télévision|
+C193|||||d'ordinateur|
+C194||das Kennwort|||pour se connecter|
+C195|||||son fort et gênant|
+C196|||||rue, voisins|
+C197|||||sans agitation|
+C198|||||après le ménage|
+C199|||||pas lavé|
+C200|||||verre, boîte|
+C201|||||verre, salle|
+C202|a poll||el sondeo||questions posées aux gens|
+C203|||||point positif|
+C204||||un désavantage|point négatif|
+C205|||||ce qu'on sait faire|
+C206|||||travail à faire|
+C207|||||à atteindre|
+C208|||||contraire du succès|
+C209|||||justice, enquête|
+C210||das Resultat|||examen, calcul, match|
+C211|||||bricolage|
+C212|||||longueur, température|
+C213|||||quelque chose de faux|
+C214|||||chose difficile à réussir|
+C215||die Kenntnisse|los conocimientos|le savoir|ce qu'on a appris|
+C216||||||
+C217||die globale Erwärmung|||écologie|
+C218||||les ordures||
+C219|||||déchets|
+C220|||||progrès|
+C221|||||prix, quantité|
+C222||||||
+C223|||||deux choses|
+C224|||||avec un instrument|
+C225|||||mathématiques|
+C226|||||matériel, service|
+C227|||||règle, condition|
+C228|||||un problème, un danger|
+C229||sich beklagen|||mécontent|
+C230||||||
+C231|||||comprendre soudain|
+C232|||persuadir||par des arguments|
+C233|||||pour un accord|
+C234|||||mettre à la place|
+C235|||||projet, produit|
+C236||verlässlich|confiable||on peut compter dessus|
+C237|||||résultat, rendement|
+C238||||||
+C239|||||produit, service|
+C240|||||dont on a besoin|
+C241||||||
+C242||||en ce moment||
+C243||||en réalité||
+C244||||toutefois|mot de liaison, opposition|
+C245|||||pour ajouter un argument|
+C246|||||préposition d'opposition|
+C247||||||
+C248||||à peu près|avec un nombre|
+C249|||||métier|
+C250|||la compañía|||
+C251|||||commerce, industrie|
+C252|||||argent|
+C253||||l'épargne|argent mis de côté|
+C254|||||texture, saveur|
+C255|exhausted|erschöpft|agotado|épuisé||
+C256|||||distance|
+C257|||||chemin après la pluie|
+C258|||||météo|
+C259|||||pour servir à table|
+C260|||||collée sur un objet|
+C261|||||de chemise|
+C262|||||d'oiseau|
+C263|unjust||||d'une décision|
+C264|||||en métal|
+C265||der Bindfaden|||pour attacher un paquet|
+C266||||||
+C267|||||tir à l'arc|
+C268||der Mittagsschlaf|||repos en journée|
+C269|||||après la pluie|
+C270|to mock sb||reírse de alguien||attitude blessante|
+C271|||||métier|
+C272|||||taille|
+C273|||||pilosité du visage|
+C274|||||organe respiratoire|
+C275|to tidy away||||ses affaires|
+C276|||||un objet au mur|
+C277|the weather report||el parte meteorológico|les prévisions météo||
+C278|||||en cas de rhume|
+C279|||||trait de caractère|
+C280|||||réflexe du nez|
+C281|a schedule||||organisation du temps|
+C282|to fix||arreglar|||
+C283|the mic|das Mikro|el micro|||
+C284||die Zimmerdecke|||d'une pièce|
+C285||||||
+C286|||||animal à coquille|
+C287|||||le linge|
+C288|||||à moudre|
+C289|||||perdre l'équilibre|
+C290|||||de meuble|
+C291|||||un liquide|
+C292|||||un chaton, un bébé|
+C293|a bouquet||||chez le fleuriste|
+C294|||||récompense sportive|
+C295|||||trousse d'écolier|
+C296|an oak tree||||arbre|
+C297|||quedarse dormido||au lit|
+C298|||||d'oiseau|FR : "une nichée" = les oisillons d'une couvée, pas le nid lui-même
+C299|||||couture|
+C300|||perder peso|perdre du poids|régime|
+C301|||las alubias||légume|FR : "les flageolets" = une variété précise de haricots, sens trop restreint
+C302|||||dans l'eau|
+C303||zurücksenden|||un colis|
+C304|||||perçue par le nez|
+C305|to recover from||||d'une épreuve|
+C306|a number plate||||de voiture|
+C307|||||quantité|
+C308|||||objet ou responsabilité|
+C309||||réunir|personnes ou objets|
+C310|to predict|voraussagen||prédire|météo, tendances|
+C311|a power outage||el corte de luz||tout s'éteint|
+C312|||||de porte, de réglage|
+C313||die Äste|||d'un arbre|DE : "die Branchen" = secteurs d'activité (faux ami) et FR "les filières" = cursus/secteurs ; autre sens que les branches d'arbre
+C314|to pile up|aufstapeln|||les uns sur les autres|
+C315|unfairness||||notion morale|
+C316|a work placement||||formation, entreprise|
+C317|||||recrutement|FR : "une lettre de motivation" = cover letter (DE "das Anschreiben"), pas la candidature elle-même
+C318|||||personne ou tâche|
+C319|to hurry|||se dépêcher|manque de temps|
+C320|||||navire, avion|
+C321||das Faltblatt;der Prospekt|||document d'information|
+C322|||||entreprise, recherche|
+C323||||||
+C324|||||jardinage|
+C325||unter dem Durchschnitt|inferior a la media|en dessous de la moyenne|niveau, résultats|
+C326|||||géométrie, graphique|
+C327||||||
+C328|to postpone|aufschieben|||dans le temps|
+C329|mindset|die Denkweise||l'état d'esprit|psychologie collective|
+C330|to decline|zurückweisen|rehusar||une offre|
+C331|||||nouvelle ou surface|
+C332|||||recette de cuisine|
+C333|||la migaja||de pain, de gâteau|
+C334|||||faire attention|
+C335||||miser|jeux d'argent|
+C336|||||justice ou morale|
+C337|bills||||à payer|
+C338||aufteilen||distribuer;partager|entre plusieurs|
+C339||||||
+C340|a sum|die Summe||une somme|d'argent|
+C341|||||goût|
+C342||nachsehen|buscar|||
+C343|to wrap up|einpacken|||un cadeau|
+C344|to go hiking||||à pied en montagne|
+C345|||el crédito|un crédit|à la banque|
+C346|an adversary|der Kontrahent||||
+C347|a refuge|||un refuge|lieu de protection|
+C348||||l'échéance|remise d'un travail|
+C349|||||contraire de total|
+C350|the coast|||||
+C351|amusing|amüsant||||
+C352|||||texte, tableau, fichier|
+C353|||||aux ordres, aux parents|
+C354|||el sobrenombre||nom donné par les amis|
+C355|||angosto||contraire de large|FR : "borné" = narrow-minded (sens figuré), les autres langues ont le sens physique
+C356|to get away||huir||prison, danger|
+C357|a tarpaulin|die Abdeckplane|||pour couvrir, protéger|
+C358||zerstreuen||disperser|graines, papiers|
+C359|to tolerate|||tolérer||
+C360|to investigate|||||
+C361|||||par la fenêtre|
+C362|||||finance, comptabilité|
+C363|to carry on with|fortfahren mit||poursuivre|une tâche|
+C364|||tranquilizar|||
+C365|one way or another|auf irgendeine Weise||d'une façon ou d'une autre||
+C366|a device|||||
+C367|||||objets, prix qui monte|
+C368|conclusions|||||
+C369|||||perte d'emploi|
+C370||||||
+C371|to spin around|sich im Kreis drehen||||
+C372|to drive away|||faire fuir||
+C373||||torride||
+C374|||||froid ou fin de réunion|
+C375|by then||para ese momento|d'ici là||
+C376|partly|zum Teil|en parte|en partie||
+C377|overall;all in all|alles in allem||||
+C378|an offer||||lors d'une vente|
+C379|||||animal dans la neige|
+C380||problemlos|||déroulement d'un projet|
+C381|||||dans un liquide|
+C382|to fall apart||desmoronarse||vieil objet abîmé|
+C383|I don't mind|ich habe keine Einwände||je n'ai rien contre|réponse polie, accord|
+C384|to go over||||un document|
+C385|||||ordre, ou en voiture|
+C386|horrible||||odeur ou personne|
+C387|||valorar|estimer||
+C388|||||chef d'équipe|
+C389|||||action, ingrédients|
+C390|a first draft|die Rohfassung||une ébauche|texte pas encore propre|
+C391|||||distance, à pied|
+C392|to stare at|||fixer|sans détourner les yeux|EN : "to peer at" = scruter (regarder avec effort), pas "regarder fixement"
+C393|to make sure|||||
+C394|||||ses devoirs, sa santé|
+C395|||||pour avancer en barque|
+C396||der Telefonhörer||||
+C397|a hobby|das Hobby||un loisir|temps libre|
+C398|carelessness||el descuido||manque d'attention, faute|
+C399||||||
+C400||||vaciller|une lumière|
+C401|to resign|sein Amt niederlegen||quitter ses fonctions|poste de direction|
+C402|||||musique, radio|
+C403||||retransmettre||
+C404|a selection||||de chocolats, de fromages|
+C405|||||argent pour études, projet|
+C406|||||nombre, chaussette, comportement|
+C407|||||voiture, ou mesure|
+C408||der Mopp||le balai à franges|ménage, sol|
+C409|||||invités, ou spectacle|
+C410||||faire de l'auto-stop|au bord de la route|
+C411|swollen||||yeux, visage|
+C412|||||un obstacle|
+C413|the tiles|||les carreaux||
+C414|||||musée, parking|
+C415|severity|||||
+C416||||||
+C417|an informer||||police|
+C418||ins Gewicht fallen|||sens figuré, influence|
+C419|||||ventilation, câbles|
+C420|mixed|||||
+C421|to mistrust||||doute envers quelqu'un|
+C422||||||
+C423||||||
+C424|reorganised|reorganisiert|reorganizado|||
+C425|to climb|||||
+C426|||||qui pose des questions|
+C427|to look after|||||
+C428||der Schwangerschaftsabbruch|||médecine|
+C429|||||cendrier|
+C430||||octroyer|une faveur, une demande|
+C431||der Hauptschlüssel|||serrurerie|
+C432||ein Gebot abgeben|||aux enchères|
+C433|||||métier du bâtiment|
+C434|||||pompiers|
+C435|||||sens propre|
+C436|||||cérémonie|
+C437||der Personalabbau|el recorte de personal|une réduction d'effectifs|entreprise|
+C438|||||corde ou emploi du temps|
+C439|||||responsabilité à qqn|
+C440||||||
+C441|the flip side|die andere Seite der Medaille|||expression figurée|
+C442|||||respect des ordres|
+C443|furious;infuriated|wütend||fou de rage||
+C444|||||hommes-femmes|
+C445||||acceptable|qualité moyenne|
+C446||||un mélange explosif|chimie|
+C447||gerade noch|||victoire ou accident évité|FR : "étroitement" = autre sens (narrowly defined = de façon étroite), les autres langues = de justesse
+C448||||||
+C449|||el asbesto||matériau isolant|
+C450||angegriffen werden|ser atacado||violence physique|
+C451|||||jardinage|
+C452|to block;to hinder|||||
+C453|||||sens figuré|
+C454||||||
+C455|to infuriate|in Wut bringen|poner furioso|mettre en rage||
+C456|||||contraire du gros|
+C457|||||trafic, marché|
+C458||die Teilzahlung|el plazo||achat à crédit|
+C459|an obstacle course|der Hindernisparcours|la pista de obstáculos|un parcours d'obstacles|entraînement militaire|
+C460|perfumed;fragrant|parfümiert|||savon, bougie|
+C461|||el gozne||porte, couvercle|
+C462|to center on|||||
+C463||einen Schmollmund machen|||avec les lèvres|
+C464|||||ménopause|
+C465|to give up|||||
+C466|to finish|beenden|||une tâche|
+C467|||||en vitesse|
+C468|||||grande variété|
+C469|||||zoo, terrain|
+C470||||faire la tare||
+C471|a notch|die Einkerbung|la mella||sur une lame, un bord|
+C472|to turn a blind eye to|||||
+C473|to soothe;to alleviate|mildern||||
+C474|an oil can|||une burette à huile|mécanique|
+C475|||el buril||outil de sculpteur|
+C476|to rule sb with an iron fist|||diriger qqn d'une main de fer|chef autoritaire|
+C477|to be tangled||estar enmarañado|être enchevêtré;être empêtré|fils ou situation|
+C478||||||
+C479|to implore;to beg|inständig bitten||implorer||
+C480||||un monticule|relief de terrain|
+C481||das ist der Gipfel;das schlägt dem Fass den Boden aus|||exclamation d'indignation|
+C482||||||
+C483|in accordance with;in compliance with|entsprechend||en conformité avec||
+C484|||||petit espace retiré|
+C485||schräg||||
+C486|to chew||mascar||avec les dents|
+C487|to add;to attach|||||
+C488|to fail to recognise|||ne pas reconnaître|la valeur, l'importance|
+C489|the whole|das Ganze|||sans rien omettre|
+C490|||||aliment ou personne|
+C491|to pinch||mordisquear||avec doigts ou dents|
+C492||die Zahlungsrückstände|los pagos atrasados|les impayés|loyer, factures|
+C493||||||
+C494|sharp as a tack||||expression imagée|
+C495|dapper|elegant||||
+C496|to avoid;to shun|vermeiden|evitar|||
+C497|to nullify|||||
+C498|a crossing-out||el tachón||texte écrit|
+C499|a rower||||aviron|
+C500|||||point de convergence|
+C501||||||
+C502|to bury||enterrar|enterrer||
+C503|to apply for||||un poste, un congé|
+C504||||||
+C505|to snuggle||||contre quelqu'un|
+C506|opprobrium||||réputation|
+C507|agile||||doigts, mouvements|
+C508|emerging||emergente|émergent||
+C509||||raisonnablement|degré moyen|
+C510|a dividing wall|die Zwischenwand|la pared divisoria||bâtiment|
+C511|||entrar uno tras otro||dans une salle|
+C512|||el tonto||insulte légère|
+C513||rutschsicher||antiglisse|tapis, semelle|
+C514|||||par des remarques|

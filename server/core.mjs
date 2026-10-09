@@ -3,6 +3,7 @@ import { randomBytes, createHash, randomInt } from 'node:crypto';
 import { kv, update } from './store.mjs';
 import { norm, wordKey } from './norm.mjs';
 import { SEED } from './seed.mjs';
+import { PATCHES } from './patches.mjs';
 
 export const LANGS = ['en', 'de', 'es'];
 const TYPES = ['nom', 'verbe', 'adjectif', 'adverbe', 'expression', ''];
@@ -48,7 +49,40 @@ export async function baseDoc(lang) {
     await s.set(`words/${lang}`, seedWords(lang), { onlyIfNew: true });
     doc = await s.get(`words/${lang}`);
   }
+  const done = doc.patches || [];
+  if (PATCHES.some((p) => !done.includes(p.id))) doc = await applyPatches(lang);
   return doc;
+}
+
+function mergeTerms(base, add, max = 3) {
+  const out = [...base];
+  for (const a of add || []) if (!out.some((o) => o.toLowerCase() === a.toLowerCase())) out.push(a);
+  return out.slice(0, max);
+}
+
+// Applique une seule fois chaque correctif ; un mot déjà relu ou corrigé (rv) n'est pas modifié.
+async function applyPatches(lang) {
+  return update(`words/${lang}`, (doc) => {
+    doc.patches = doc.patches || [];
+    for (const p of PATCHES) {
+      if (doc.patches.includes(p.id)) continue;
+      for (const [c, e] of Object.entries(p.data)) {
+        const w = doc.words[`${lang}-${c}`];
+        if (!w || w.src !== 'base' || w.rv) continue;
+        const rm = e.rm || {}; const rp = e.rp || {};
+        const fix = (terms, k) => {
+          let out = terms.filter((x) => !(rm[k] || []).includes(x)).map((x) => (rp[k] && rp[k][x]) || x);
+          if (!out.length) out = terms;
+          return mergeTerms(out, e[k]);
+        };
+        w.t = fix(w.t, lang);
+        w.f = fix(w.f, 'fr');
+        if (!w.note && e.h) w.note = e.h;
+      }
+      doc.patches.push(p.id);
+    }
+    return doc;
+  });
 }
 
 async function userWord(id) {

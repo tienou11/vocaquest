@@ -558,9 +558,10 @@ SCREENS.admin = () => {
   <div class="small">${a.pendingRequests} demande${a.pendingRequests > 1 ? 's' : ''} de vérification en attente.</div>` : ''}
   <div class="card" style="display:flex;flex-direction:column;gap:10px"><b>Faire vérifier par Claude</b>
     <select class="inp" data-bind="adm.scope">${scopes.map(([v, l]) => `<option value="${v}" ${S.adm.scope === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
-    <button class="btn blue" data-a="adminRequest">Envoyer la demande</button>
-    <span class="small">Claude la traite dans l'heure (7 h – 22 h) et t'envoie un résumé par e-mail.</span>
-    <button class="btn2" data-a="copyAdminRequest">Copier la demande pour Claude (immédiat)</button>
+    <button class="btn blue" data-a="copyAdminRequest">Vérifier maintenant</button>
+    <span class="small">La demande est copiée : colle-la dans une conversation Claude. Le résumé s'affiche dans la conversation.</span>
+    <button class="btn2" data-a="adminRequest">Ajouter à la vérification de lundi</button>
+    <span class="small">Claude la traite lundi à 7 h avec la relecture hebdomadaire et t'envoie le résumé par e-mail.</span>
   </div>
   <div class="row wrap">${[['flagged', 'À arbitrer'], ['to_check', 'À vérifier'], ['search', 'Rechercher']].map(([v, l]) => `<button class="pill ${S.adm.tab === v ? 'on' : ''}" data-a="admTab" data-v="${v}">${l}</button>`).join('')}</div>
   ${S.adm.tab === 'search' ? `<div class="row"><input class="inp grow" data-bind="adm.q" value="${esc(S.adm.q)}" placeholder="mot ou traduction"><button class="btn2" style="width:auto" data-a="admSearch">Chercher</button></div>` : ''}
@@ -822,11 +823,20 @@ const A = {
   },
   async adminRequest() {
     const [scope, value] = (S.adm.scope || 'to_check').split(':');
-    try { await api('/admin/request', { body: { scope, value } }); S.admin = await api('/admin/summary'); render(); toast('Demande enregistrée. Claude la traitera dans l\'heure (7 h – 22 h) et t\'enverra un résumé par e-mail.', 6000); } catch (e) { fail(e); }
+    try { await api('/admin/request', { body: { scope, value } }); S.admin = await api('/admin/summary'); render(); toast('Demande enregistrée pour la vérification de lundi 7 h.', 5000); } catch (e) { fail(e); }
   },
   async copyAdminRequest() {
-    const text = 'Utilise le connecteur VocaQuest : traite les demandes de vérification en attente (outil list_requests) en suivant les règles du connecteur (dictionnaires Larousse, PONS, Duden, RAE ; 1 à 2 synonymes par langue ou un indice de sens ; validated ou flagged ; sources citées ; doublons fusionnés). Termine chaque demande avec complete_request et donne-moi le résumé.';
-    try { await navigator.clipboard.writeText(text); toast('Demande copiée : colle-la dans Claude.'); } catch { toast(text, 12000); }
+    const labels = { to_check: 'les mots à vérifier', missing_synonyms: 'les mots sans synonymes ni indice', 'language:en': 'toute la base anglaise', 'language:de': 'toute la base allemande', 'language:es': 'toute la base espagnole', all: 'toute la base' };
+    const label = labels[S.adm.scope || 'to_check'] || labels.to_check;
+    const text = `Avec le connecteur VocaQuest, vérifie maintenant ${label}. Contrôle chaque mot dans des dictionnaires reconnus (Larousse, PONS, Duden, RAE, Cambridge), corrige si besoin, ajoute 1 à 2 synonymes par langue ou un indice de sens court, mets le statut validated si c'est sûr ou flagged en cas de doute, cite tes sources et fusionne les doublons (merge_words). Traite aussi les demandes en attente (list_requests puis complete_request). Termine par un résumé : mots vérifiés, corrigés, à arbitrer, avec la liste des corrections.`;
+    let ok = false;
+    try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); ok = true; } } catch { ok = false; }
+    if (!ok) {
+      const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+      try { ok = document.execCommand('copy'); } catch { ok = false; }
+      ta.remove();
+    }
+    toast(ok ? 'Demande copiée : colle-la dans une conversation Claude.' : text, ok ? 4000 : 15000);
   },
   async revert(el) { try { await withLoading(() => api('/admin/revert', { body: { id: el.dataset.id } })); S.admin = await api('/admin/summary'); render(); toast('Correction annulée.'); } catch (e) { fail(e); } },
   async exportCsv(el) {
