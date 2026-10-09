@@ -191,6 +191,7 @@ SCREENS.home = () => {
   </div>
   ${S.newRc ? `<div class="banner">${icon.shield}<div class="grow"><b>Nouveau code de secours</b><br><span style="font-family:Fredoka,sans-serif;font-size:18px;letter-spacing:.06em">${esc(S.newRc)}</span><br>Note-le, l'ancien ne marche plus.</div><button data-a="ackNewRc">Noté</button></div>` : ''}
   ${p.sessions.length && !p.rcAck && !S.newRc ? `<div class="banner">${icon.shield}<div class="grow"><b>Protège ta progression</b><br>Note ton code de secours.</div><button data-a="nav" data-to="profile">Voir</button></div>` : ''}
+  ${(p.badgeNews || []).length ? `<div class="banner">${icon.medal}<div class="grow"><b>Tu n'as pas joué depuis un moment</b><br>Badge perdu : ${p.badgeNews.map((id) => '« ' + esc(badgeName(id)) + ' »').join(', ')}. Rejoue pour le regagner !</div><button data-a="ackBadges">OK</button></div>` : (() => { const r = badgeRisk(); return r ? `<div class="banner">${icon.medal}<div class="grow"><b>Garde ton badge « ${esc(badgeName(r.id))} »</b><br>Joue avant le ${r.date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}${r.daysLeft <= 1 ? ' (demain au plus tard)' : ''}.</div></div>` : ''; })()}
   ${S.noStorage ? '<div class="banner"><div class="grow">Ton navigateur bloque l\'enregistrement (navigation privée ?). Ton profil sera perdu à la fermeture.</div></div>' : ''}
   <div class="grid3">
     <div class="stat"><span>Mots découverts</span><b>${disc}/${lw.length}</b><span>niveau ${pr.level}</span></div>
@@ -325,6 +326,7 @@ SCREENS.result = () => {
   <div class="card" style="text-align:center"><div class="big">${q.score} / ${total}</div><b class="sub">+${q.xp + (r.bonus || 0)} XP</b></div>
   ${r.offline ? '<div class="banner"><div class="grow">Résultat non enregistré (pas de connexion).</div></div>' : ''}
   ${levelMsg}
+  ${(r.newBadges || []).map((id) => `<div class="banner" style="background:#FFF1D6">${icon.medal}<div class="grow"><b>Badge gagné : ${esc(badgeName(id))} !</b></div></div>`).join('')}
   ${missed.length ? `<b>À revoir</b>${missed.map((id) => { const w = W(id); if (!w) return ''; const rv = !!(st(id) && st(id).r); return `<div class="list-item"><span class="grow">${esc(w.t.join(' / '))}</span><b class="grow" style="text-align:right">${esc(w.f.join(' / '))}</b><button class="iconbtn" data-a="toggleRev" data-id="${esc(id)}" aria-pressed="${rv}" aria-label="À revoir">${starSvg(rv, 22)}</button></div>`; }).join('')}` : ''}
   ${missed.length ? '<button class="btn red" data-a="replayMissed">Rejouer mes erreurs</button>' : ''}
   <button class="btn ${missed.length ? 'blue' : 'red'}" data-a="replay">Rejouer</button>
@@ -491,15 +493,21 @@ SCREENS.lessons = () => {
 </div>`;
 };
 
-function badgesList() {
-  const p = S.p; const s = p.sessions;
-  const langsTried = new Set(s.map((x) => x.lang));
-  const maxLv = Math.max(1, ...Object.values(p.prog || {}).map((x) => x.level));
-  return [
-    ['Première partie', s.length > 0], ['Premier 20/20', s.some((x) => x.total >= 20 && x.score === x.total)], ['7 jours d\'affilée', (p.best || 0) >= 7],
-    ['Niveau 5', maxLv >= 5], ['Niveau 10', maxLv >= 10], ['3 langues', langsTried.size >= 3], ['Première leçon', p.lessons.length > 0],
-    ['100 mots réussis', Object.values(p.w).filter((x) => x.c >= 1).length >= 100], ['1 000 XP', p.xp >= 1000],
-  ];
+const BADGES = [
+  ['first_game', 'Première partie', 'Joue une partie'], ['perfect', 'Premier 20/20', 'Fais un 20/20'], ['streak7', "7 jours d'affilée", 'Joue 7 jours de suite'],
+  ['level5', 'Niveau 5', 'Joue au niveau 5'], ['level10', 'Niveau 10', 'Joue au niveau 10'], ['langs3', '3 langues', 'Joue dans les 3 langues'],
+  ['lesson1', 'Première leçon', 'Ajoute une leçon'], ['correct100', '100 bonnes réponses', 'Donne 100 bonnes réponses'], ['xp1000', '1 000 XP', 'Gagne 1 000 XP'],
+];
+const badgeName = (id) => (BADGES.find((b) => b[0] === id) || [id, id])[1];
+// Badge menacé : le plus récent encore détenu, et la date limite pour le garder.
+function badgeRisk() {
+  const p = S.p; const last = p.sessions.length ? p.sessions[p.sessions.length - 1].at : null;
+  const held = Object.entries(p.badges || {}).filter(([, v]) => !v.lost).sort((x, y) => y[1].at.localeCompare(x[1].at));
+  if (!last || !held.length) return null;
+  const n = p.decay && p.decay.since === last ? p.decay.n : 0;
+  const deadline = Date.parse(last) + (n + 1) * 30 * 864e5;
+  const daysLeft = Math.ceil((deadline - Date.now()) / 864e5);
+  return daysLeft <= 9 ? { id: held[0][0], date: new Date(deadline), daysLeft } : null;
 }
 SCREENS.progress = () => {
   const p = S.p; const lang = p.lang; const pr = prog(lang);
@@ -512,7 +520,8 @@ SCREENS.progress = () => {
   ${sess.length ? `<div class="bars" style="margin-top:10px">${sess.map((s) => `<div title="${frDate(s.day)}"><span>${s.score}</span><i class="${s.lc === 1 ? 'up' : ''}" style="height:${Math.max(4, Math.round((s.total ? s.score / s.total : 0) * 130))}px"></i></div>`).join('')}</div><div class="small" style="margin-top:6px">Barre bleue : passage de niveau. Hauteur : note rapportée à 20.</div>` : '<p class="sub">Pas encore de partie dans cette langue.</p>'}</div>
   ${ev.length ? `<div class="card"><b>Changements de niveau</b>${ev.map((e) => `<div class="small" style="margin-top:6px">${frDate(e.at)} : niveau ${e.from} → ${e.to} ${e.why === 'manual' ? '(choisi)' : e.why === 'auto_up' ? '(gagné !)' : '(consolidation)'}</div>`).join('')}</div>` : ''}
   <b>Badges</b>
-  <div class="badges">${badgesList().map(([n, on]) => `<div class="bdg ${on ? 'on' : ''}">${icon.medal}<span>${esc(n)}</span></div>`).join('')}</div>
+  <div class="badges">${BADGES.map(([id, n, how]) => { const b = (p.badges || {})[id]; const st = b ? (b.lost ? 'lost' : 'on') : ''; return `<div class="bdg ${st}">${icon.medal}<span>${esc(n)}</span>${st === 'on' ? '' : `<small>${st === 'lost' ? 'Perdu · ' : ''}${esc(how)}</small>`}</div>`; }).join('')}</div>
+  <p class="small">Sans partie pendant 30 jours, tu perds ton dernier badge gagné, puis un autre chaque mois. Rejoue pour les regagner.</p>
 </div>`;
 };
 
@@ -663,11 +672,11 @@ async function finishSession() {
   S.r = { q, levelChange: 0, remaining: 0, bonus: 0, offline: false };
   try {
     const res = await api('/finish', { body: { mode: q.mode, lang: q.lang, score: q.score, total: q.items.length, day: today(), lesson: q.lesson } });
-    S.p = res.profile; S.r.levelChange = res.levelChange; S.r.remaining = res.remaining; S.r.bonus = res.bonus;
+    S.p = res.profile; S.r.levelChange = res.levelChange; S.r.remaining = res.remaining; S.r.bonus = res.bonus; S.r.newBadges = res.newBadges || [];
   } catch { S.r.offline = true; }
   S.stack = [];
   S.screen = 'result'; render(); window.scrollTo(0, 0);
-  if (q.score === q.items.length || S.r.levelChange === 1) confetti();
+  if (q.score === q.items.length || S.r.levelChange === 1 || (S.r.newBadges || []).length) confetti();
 }
 
 // ---------- Actions ----------
@@ -676,6 +685,7 @@ const A = {
   home,
   nav(el) { if (el.dataset.to === 'profile') { S.tmp.name = null; S.transfer = null; } go(el.dataset.to); },
   ackNewRc() { S.newRc = null; api('/me', { body: { rcAck: true } }).then((r) => { S.p = r.profile; render(); }).catch(fail); render(); },
+  async ackBadges() { try { const r = await api('/me', { body: { badgeAck: true } }); S.p = r.profile; render(); } catch (e) { fail(e); } },
   async ackRc() { try { const r = await api('/me', { body: { rcAck: true } }); S.p = r.profile; render(); } catch (e) { fail(e); } },
   playLevel() {
     if (!S.p.setup) { S.tmp = { lang: S.p.lang, level: prog(S.p.lang).level, name: S.p.name }; go('setup'); return; }

@@ -89,6 +89,7 @@ const server = shim
   + moduleOf('norm', 'server/norm.mjs')
   + moduleOf('seed', 'server/seed.mjs')
   + moduleOf('patches', 'server/patches.mjs')
+  + moduleOf('badges', 'server/badges.mjs')
   + moduleOf('core', 'server/core.mjs')
   + moduleOf('http', 'server/http.mjs')
   + fetchHook;

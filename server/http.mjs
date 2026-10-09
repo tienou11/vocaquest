@@ -7,7 +7,7 @@ const json = (data, status = 200) =>
 const ROUTES = {
   'POST /profile': ({ body }) => C.createProfile(body),
   'POST /redeem': ({ body }) => C.redeem(body),
-  'GET /me': async ({ p }) => ({ profile: C.publicProfile(p) }),
+  'GET /me': async ({ p }) => ({ profile: await C.getMe(p) }),
   'POST /me': async ({ p, body }) => ({ profile: await C.updateMe(p, body) }),
   'POST /level': async ({ p, body }) => ({ profile: await C.setLevel(p, body) }),
   'GET /words': async ({ p, q }) => ({ words: await C.wordsFor(p, q.lang || p.lang) }),

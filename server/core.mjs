@@ -4,6 +4,7 @@ import { kv, update } from './store.mjs';
 import { norm, wordKey } from './norm.mjs';
 import { SEED } from './seed.mjs';
 import { PATCHES } from './patches.mjs';
+import { awardBadges, decayBadges } from './badges.mjs';
 
 export const LANGS = ['en', 'de', 'es'];
 const TYPES = ['nom', 'verbe', 'adjectif', 'adverbe', 'expression', ''];
@@ -159,6 +160,20 @@ export async function auth(req) {
 
 const pkey = (p) => `p/${p.id}`;
 
+// Lecture du profil : initialise les badges (anciens profils) et applique la perte après un mois sans partie.
+export async function getMe(p) {
+  const needInit = !p.badges;
+  const last = p.sessions.length ? p.sessions[p.sessions.length - 1].at : null;
+  const months = last ? Math.floor((Date.now() - Date.parse(last)) / (30 * 864e5)) : 0;
+  const decayDone = p.decay && p.decay.since === last ? p.decay.n : 0;
+  if (!needInit && months <= decayDone) return publicProfile(p);
+  return update(pkey(p), (q) => {
+    if (!q.badges) awardBadges(q, nowIso());
+    decayBadges(q, Date.now());
+    return publicProfile(q);
+  });
+}
+
 export async function updateMe(p, b) {
   return update(pkey(p), (q) => {
     if (typeof b.name === 'string') q.name = b.name.trim().slice(0, 30);
@@ -168,6 +183,7 @@ export async function updateMe(p, b) {
     if (typeof b.sound === 'boolean') q.sound = b.sound;
     if (b.setup === true) q.setup = true;
     if (b.rcAck === true) q.rcAck = true;
+    if (b.badgeAck === true) q.badgeNews = [];
     return publicProfile(q);
   });
 }
@@ -264,10 +280,12 @@ export async function finish(p, b) {
       q.best = Math.max(q.best || 0, q.streak);
       q.lastDay = day;
     }
-    q.sessions.push({ at: nowIso(), day, lang, mode, level, score, total, lc, lesson: b.lesson || null });
+    const now = nowIso();
+    q.sessions.push({ at: now, day, lang, mode, level, score, total, lc, lesson: b.lesson || null, xp: score * 10 + bonus });
     q.sessions = q.sessions.slice(-300);
     q.events = q.events.slice(-200);
-    return { profile: publicProfile(q), levelChange: lc, remaining, bonus };
+    const newBadges = awardBadges(q, now);
+    return { profile: publicProfile(q), levelChange: lc, remaining, bonus, newBadges };
   });
 }
 
@@ -318,6 +336,7 @@ export async function createLesson(p, b) {
       if (!st.d) st.d = today;
     }
     for (const id of created) if (!q.mine.includes(id)) q.mine.push(id);
+    awardBadges(q, nowIso());
     return publicProfile(q);
   });
   return { lesson, profile: prof, created: created.length };

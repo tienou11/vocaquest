@@ -101,6 +101,8 @@ textarea.inp { min-height: 120px; font-family: ui-monospace, Menlo, Consolas, mo
 .badges { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .bdg { border-radius: 16px; padding: 10px 6px; min-height: 86px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; font-size: 12px; font-weight: 800; background: #fff; color: #6B7593; border: 2px dashed var(--line2); }
 .bdg.on { background: var(--warn-bg); color: var(--warn); border: 2px solid #F2C46D; }
+.bdg.lost { background: #fff; color: var(--ko); border: 2px dashed #E3A39B; }
+.bdg small { font-size: 11px; font-weight: 700; color: var(--muted); line-height: 1.2; }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: 440px; width: calc(100% - 32px); background: #1B2340; color: #fff; border-radius: 14px; padding: 12px 16px; font-weight: 700; font-size: 15px; z-index: 50; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
 .loading { position: fixed; inset: 0; background: rgba(246,248,253,.6); display: flex; align-items: center; justify-content: center; z-index: 40; }
 .spin { width: 56px; height: 56px; border-radius: 50%; border: 7px solid #DCE3F2; border-top-color: var(--red); animation: rot 1s linear infinite; }
