@@ -167,7 +167,10 @@ SCREENS.boot = () => '<div class="screen" style="align-items:center;justify-cont
 SCREENS.gate = () => `<div class="screen" style="min-height:90vh;justify-content:center">
   <div class="mascot" style="text-align:center">VocaQuest</div>
   <h1 class="title" style="text-align:center">Bienvenue !</h1>
-  <p class="sub" style="text-align:center">Cette appli fonctionne sur invitation. Ouvre le lien d'invitation que tu as reçu pour créer ton profil.</p>
+  <p class="sub" style="text-align:center">Pour commencer, saisis le code d'invitation que tu as reçu, ou colle le lien d'invitation en entier.</p>
+  <label class="lab" for="icode">Code d'invitation</label>
+  <input id="icode" class="inp" style="font-size:20px;text-align:center" data-bind="tmp.icode" value="${esc(S.tmp.icode || '')}" placeholder="ex. famille-abc123" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go">
+  <button class="btn red" data-a="joinInvite">Commencer</button>
   <button class="btn2" data-a="nav" data-to="recover">J'ai déjà un profil sur un autre appareil</button>
 </div>`;
 
@@ -786,6 +789,18 @@ const A = {
   async toggleSound() { try { const r = await api('/me', { body: { sound: !S.p.sound } }); S.p = r.profile; render(); } catch (e) { fail(e); } },
   async makeTransfer() { try { S.transfer = await api('/transfer', { body: {} }); render(); } catch (e) { fail(e); } },
   async claimAdmin() { try { const r = await api('/admin/claim', { body: { code: (S.tmp.adminCode || '').trim() } }); S.p = r.profile; toast('Mode administrateur activé.'); render(); } catch (e) { fail(e); } },
+  async joinInvite() {
+    let code = (S.tmp.icode || '').trim();
+    const m = code.match(/[?&]i=([^&#\s]+)/);
+    if (m) code = decodeURIComponent(m[1]);
+    if (!code) { toast("Saisis le code d'invitation."); return; }
+    try {
+      const res = await withLoading(() => api('/profile', { body: { invite: code }, noLogout: true }));
+      S.token = res.token; if (!store.set('vq_token', res.token)) S.noStorage = true;
+      S.tmp = {};
+      await withLoading(boot2);
+    } catch (e) { fail(e); }
+  },
   async redeem() {
     const code = (S.tmp.rcode || '').trim();
     if (!code) { toast('Saisis le code.'); return; }
@@ -883,6 +898,7 @@ document.addEventListener('keydown', (e) => {
   }
   if (S.screen === 'quiz' && S.q && S.q.fb && e.target.tagName !== 'BUTTON') { e.preventDefault(); nextQuestion(); }
   if (e.target.id === 'rcode') { e.preventDefault(); A.redeem(); }
+  if (e.target.id === 'icode') { e.preventDefault(); A.joinInvite(); }
 });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') flushPending(); });
 
@@ -909,7 +925,7 @@ async function boot() {
     if (!S.token) { S.screen = 'gate'; render(); return; }
     await boot2();
   } catch (e) {
-    if (!S.token) { S.screen = 'gate'; render(); }
+    if (!S.token) { S.tmp.icode = invite && !window.VQ_DEMO ? invite : ''; S.screen = 'gate'; render(); }
     fail(e);
   }
 }

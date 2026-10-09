@@ -124,11 +124,12 @@ export function publicProfile(p) {
 }
 
 export async function createProfile({ invite }) {
-  const inv = process.env.INVITE_CODE;
-  const adm = process.env.ADMIN_CODE;
+  const inv = (process.env.INVITE_CODE || '').trim().toLowerCase();
+  const adm = (process.env.ADMIN_CODE || '').trim().toLowerCase();
+  const code = String(invite || '').trim().toLowerCase();
   let role = 'user';
-  if (adm && invite === adm) role = 'admin';
-  else if (inv && invite !== inv) throw new HttpError(403, "Ce lien d'invitation n'est pas valable.");
+  if (adm && code === adm) role = 'admin';
+  else if (inv && code !== inv) throw new HttpError(403, "Ce code d'invitation n'est pas valable. Vérifie-le auprès de la personne qui te l'a envoyé.");
   const s = await kv();
   const id = 'p' + rid(9);
   const token = randomBytes(32).toString('base64url');
@@ -376,7 +377,7 @@ export function requireAdmin(p) {
 }
 
 export async function claimAdmin(p, { code }) {
-  if (!process.env.ADMIN_CODE || code !== process.env.ADMIN_CODE) throw new HttpError(403, 'Code administrateur incorrect.');
+  if (!process.env.ADMIN_CODE || String(code || '').trim().toLowerCase() !== process.env.ADMIN_CODE.trim().toLowerCase()) throw new HttpError(403, 'Code administrateur incorrect.');
   return update(pkey(p), (q) => { q.role = 'admin'; return publicProfile(q); });
 }
 
