@@ -244,6 +244,27 @@ SCREENS.lang = () => `<div class="screen">${back()}
   <button class="btn blue" data-a="langSave">Valider</button>
 </div>`;
 
+const fmtN = (n) => (Math.round(n * 100) / 100).toLocaleString('fr-FR');
+const HINT_ART = /^(l'|le |la |les |un |une |des |the |a |an |der |die |das |den |dem |ein |eine |einen |el |los |las |una |uno |unos |unas |to )/i;
+// Mot à trouver pour les indices : premier terme attendu, article à part, lettres repérées.
+function hintModel(it) {
+  const w = W(it.id); if (!w) return null;
+  const term = ((it.dir === 'to_fr' ? w.f : w.t)[0] || '').replace(/[’`´]/g, "'").replace(/\s*\([^)]*\)\s*/g, ' ').trim();
+  const m = term.match(HINT_ART);
+  const pre = m ? term.slice(0, m[0].length) : '';
+  const chars = Array.from(term.slice(pre.length));
+  const letters = chars.map((c, i) => (/\p{L}/u.test(c) ? i : -1)).filter((i) => i >= 0);
+  return { pre, chars, letters, nRand: letters.length >= 5 ? 2 : 1 };
+}
+function hintPoints(it) { const h = it.h || {}; return h.rand ? 0.25 : h.first ? 0.5 : 1; }
+function hintMask(it) {
+  const h = it.h; const m = hintModel(it);
+  if (!h || !m || (!h.first && !h.rand)) return '';
+  const shown = new Set(h.rand || []);
+  if (h.first && m.letters.length) shown.add(m.letters[0]);
+  const body = m.chars.map((c, i) => (m.letters.includes(i) ? (shown.has(i) ? esc(c) : '_') : (c === ' ' ? '&nbsp;&nbsp;' : esc(c)))).join(' ');
+  return `<span class="qmask" aria-label="Indice">${esc(m.pre)}${body}</span>`;
+}
 function quizParts() {
   const q = S.q; const it = q.items[q.i]; const w = W(it.id) || { t: ['?'], f: ['?'], note: '' };
   const L = LANGS[q.lang];
@@ -253,7 +274,7 @@ function quizParts() {
   const dirLabel = toFr ? `${L.name.toUpperCase()} → FRANÇAIS` : `FRANÇAIS → ${L.name.toUpperCase()}`;
   const rev = !!(st(it.id) && st(it.id).r);
   const pct = Math.round(((q.i + (q.fb ? 1 : 0)) / q.items.length) * 100);
-  const head = `<div class="row between"><button class="back" data-a="quitQuiz">✕ Arrêter</button><b>Question ${q.i + 1} / ${q.items.length}</b></div>
+  const head = `<div class="row between"><button class="back" data-a="quitQuiz">✕ Arrêter</button><div class="row" style="gap:8px"><b>Question ${q.i + 1} / ${q.items.length}</b><span class="chip score" aria-label="Score">Score ${fmtN(q.score)}</span></div></div>
   <div class="prog"><div style="width:${pct}%"></div></div>
   ${q.title ? `<div class="small" style="text-align:center">${esc(q.title)}</div>` : ''}
   <div class="qcard">
@@ -261,14 +282,21 @@ function quizParts() {
     <span class="qdir">${dirLabel}</span>
     <span class="qword">${esc(prompt)}</span>
     ${w.note ? `<span class="qhint">${esc(w.note)}</span>` : ''}
+    ${hintMask(it)}
   </div>`;
   let fb = '';
+  const hm = hintModel(it); const h = it.h || {};
   let btns;
   if (!q.fb) {
-    btns = `<button class="btn blue" data-a="submit" data-keep="1">Valider</button>
+    btns = `<div class="hints">
+        <button class="btn3" data-a="hintFirst" data-keep="1" ${h.first || !hm ? 'disabled' : ''}>Indice : 1re lettre<small>½ point</small></button>
+        <button class="btn3" data-a="hintRand" data-keep="1" ${h.rand || !hm ? 'disabled' : ''}>Indice : ${hm && hm.nRand === 2 ? '2 lettres' : '1 lettre'} au hasard<small>¼ point</small></button>
+      </div>
+      <button class="btn blue" data-a="submit" data-keep="1">Valider</button>
       <button class="btn2" data-a="dontKnow" data-keep="1">Je ne sais pas</button>`;
   } else if (q.fb === 'ok') {
-    fb = `<div class="fb ok" role="status"><div class="row">${icon.check}<h3>Juste ! +10 XP</h3></div><span>${esc(prompt)} = <b>${esc(expected)}</b></span><div class="timer"><div style="animation-duration:1.5s"></div></div></div>`;
+    const hp = hintPoints(it);
+    fb = `<div class="fb ok" role="status"><div class="row">${icon.check}<h3>${hp < 1 ? `Juste avec indice : +${fmtN(hp)} point` : 'Juste ! +1 point'}</h3></div><span>${esc(prompt)} = <b>${esc(expected)}</b></span>${hp < 1 ? '<span class="small" style="color:var(--green-d)">Ce mot sera dans « À revoir » et reviendra plus souvent.</span>' : ''}<div class="timer"><div style="animation-duration:${hp < 1 ? 2.5 : 1.5}s"></div></div></div>`;
     btns = '';
   } else {
     fb = `<div class="fb ko" role="status"><div class="row">${icon.cross}<h3>${q.given ? 'Faux' : 'Voici la réponse'}</h3></div>
@@ -323,11 +351,11 @@ SCREENS.result = () => {
   return `<div class="screen">
   <h1 class="title" style="text-align:center">${title}</h1>
   <div class="stars">${[0, 1, 2].map((i) => starSvg(i < starsN, 46)).join('')}</div>
-  <div class="card" style="text-align:center"><div class="big">${q.score} / ${total}</div><b class="sub">+${q.xp + (r.bonus || 0)} XP</b></div>
+  <div class="card" style="text-align:center"><div class="big">${fmtN(q.score)} / ${total}</div><b class="sub">+${q.xp + (r.bonus || 0)} XP</b></div>
   ${r.offline ? '<div class="banner"><div class="grow">Résultat non enregistré (pas de connexion).</div></div>' : ''}
   ${levelMsg}
   ${(r.newBadges || []).map((id) => `<div class="banner" style="background:#FFF1D6">${icon.medal}<div class="grow"><b>Badge gagné : ${esc(badgeName(id))} !</b></div></div>`).join('')}
-  ${missed.length ? `<b>À revoir</b>${missed.map((id) => { const w = W(id); if (!w) return ''; const rv = !!(st(id) && st(id).r); return `<div class="list-item"><span class="grow">${esc(w.t.join(' / '))}</span><b class="grow" style="text-align:right">${esc(w.f.join(' / '))}</b><button class="iconbtn" data-a="toggleRev" data-id="${esc(id)}" aria-pressed="${rv}" aria-label="À revoir">${starSvg(rv, 22)}</button></div>`; }).join('')}` : ''}
+  ${missed.length ? `<b>À revoir</b>${missed.map((id) => { const w = W(id); if (!w) return ''; const rv = !!(st(id) && st(id).r); return `<div class="list-item"><span class="grow">${esc(w.t.join(' / '))}${(q.hintOk || []).includes(id) ? '<br><span class="tag sug">juste avec indice</span>' : ''}</span><b class="grow" style="text-align:right">${esc(w.f.join(' / '))}</b><button class="iconbtn" data-a="toggleRev" data-id="${esc(id)}" aria-pressed="${rv}" aria-label="À revoir">${starSvg(rv, 22)}</button></div>`; }).join('')}` : ''}
   ${missed.length ? '<button class="btn red" data-a="replayMissed">Rejouer mes erreurs</button>' : ''}
   <button class="btn ${missed.length ? 'blue' : 'red'}" data-a="replay">Rejouer</button>
   <button class="btn2" data-a="home">Accueil</button>
@@ -486,7 +514,7 @@ SCREENS.lessons = () => {
   ${ls.length ? ls.map((l) => {
     const sess = S.p.sessions.filter((s) => s.lesson === l.id).slice(-1)[0];
     const conf = S.confirm === l.id;
-    return `<div class="card" style="display:flex;flex-direction:column;gap:10px"><div class="row"><span class="code">${LANGS[l.lang].code}</span><div class="grow"><b class="fd" style="font-size:18px">${esc(l.name)}</b><div class="small">${frDate(l.date)} · ${l.words.length} mots${sess ? ` · dernière note ${sess.score}/${sess.total}` : ''}</div></div></div>
+    return `<div class="card" style="display:flex;flex-direction:column;gap:10px"><div class="row"><span class="code">${LANGS[l.lang].code}</span><div class="grow"><b class="fd" style="font-size:18px">${esc(l.name)}</b><div class="small">${frDate(l.date)} · ${l.words.length} mots${sess ? ` · dernière note ${fmtN(sess.score)}/${sess.total}` : ''}</div></div></div>
     <div class="row"><button class="btn red" style="min-height:48px;font-size:17px" data-a="playLesson" data-id="${l.id}">Réviser</button><button class="btn2" style="width:auto;${conf ? 'border-color:#A3271B;color:#A3271B' : ''}" data-a="delLesson" data-id="${l.id}">${conf ? 'Confirmer' : 'Supprimer'}</button></div></div>`;
   }).join('') : '<p class="sub">Aucune leçon pour l\'instant.</p>'}
   <button class="btn3" data-a="addLesson">+ Ajouter une leçon</button>
@@ -517,7 +545,7 @@ SCREENS.progress = () => {
   <h1 class="title">Ma progression</h1>
   <div class="grid3"><div class="stat"><span>Niveau</span><b>${pr.level}</b><span>${LANGS[lang].name}</span></div><div class="stat"><span>Série</span><b>${p.streak} j</b><span>record ${p.best || 0} j</span></div><div class="stat"><span>XP</span><b>${p.xp}</b><span>${p.sessions.length} partie${p.sessions.length > 1 ? 's' : ''}</span></div></div>
   <div class="card"><b>Mes dernières notes (${LANGS[lang].name})</b>
-  ${sess.length ? `<div class="bars" style="margin-top:10px">${sess.map((s) => `<div title="${frDate(s.day)}"><span>${s.score}</span><i class="${s.lc === 1 ? 'up' : ''}" style="height:${Math.max(4, Math.round((s.total ? s.score / s.total : 0) * 130))}px"></i></div>`).join('')}</div><div class="small" style="margin-top:6px">Barre bleue : passage de niveau. Hauteur : note rapportée à 20.</div>` : '<p class="sub">Pas encore de partie dans cette langue.</p>'}</div>
+  ${sess.length ? `<div class="bars" style="margin-top:10px">${sess.map((s) => `<div title="${frDate(s.day)}"><span>${fmtN(s.score)}</span><i class="${s.lc === 1 ? 'up' : ''}" style="height:${Math.max(4, Math.round((s.total ? s.score / s.total : 0) * 130))}px"></i></div>`).join('')}</div><div class="small" style="margin-top:6px">Barre bleue : passage de niveau. Hauteur : note rapportée à 20.</div>` : '<p class="sub">Pas encore de partie dans cette langue.</p>'}</div>
   ${ev.length ? `<div class="card"><b>Changements de niveau</b>${ev.map((e) => `<div class="small" style="margin-top:6px">${frDate(e.at)} : niveau ${e.from} → ${e.to} ${e.why === 'manual' ? '(choisi)' : e.why === 'auto_up' ? '(gagné !)' : '(consolidation)'}</div>`).join('')}</div>` : ''}
   <b>Badges</b>
   <div class="badges">${BADGES.map(([id, n, how]) => { const b = (p.badges || {})[id]; const st = b ? (b.lost ? 'lost' : 'on') : ''; return `<div class="bdg ${st}">${icon.medal}<span>${esc(n)}</span>${st === 'on' ? '' : `<small>${st === 'lost' ? 'Perdu · ' : ''}${esc(how)}</small>`}</div>`; }).join('')}</div>
@@ -628,7 +656,7 @@ function startSession(sel) {
   const dir = S.p.dir;
   const items = pickWeighted(ids, n).map((id) => ({ id, dir: dir === 'mixed' ? (Math.random() < 0.5 ? 'to_fr' : 'from_fr') : dir }));
   S.lastSel = sel;
-  S.q = { mode: sel.mode, lang: sel.lang, level: prog(sel.lang).level, lesson: sel.lesson || null, title: sel.title || '', items, i: 0, score: 0, missed: [], fb: null, answer: '', given: '', xp: 0 };
+  S.q = { mode: sel.mode, lang: sel.lang, level: prog(sel.lang).level, lesson: sel.lesson || null, title: sel.title || '', items, i: 0, score: 0, missed: [], hintOk: [], fb: null, answer: '', given: '', xp: 0 };
   go('quiz');
 }
 function currentExpected() {
@@ -638,16 +666,22 @@ function currentExpected() {
 function answerWith(given, ok) {
   const q = S.q; if (!q || q.fb) return;
   const it = q.items[q.i];
+  const h = it.h || {}; const hinted = !!(h.first || h.rand);
+  const pts = ok ? hintPoints(it) : 0;
   q.fb = ok ? 'ok' : 'ko'; q.given = given; q.fbAt = Date.now();
-  if (ok) { q.score += 1; q.xp += 10; } else q.missed.push(it.id);
+  q.score += pts; q.xp += Math.round(10 * pts);
+  if (!ok || hinted) q.missed.push(it.id);
+  if (ok && hinted) q.hintOk.push(it.id);
   const s = S.p.w[it.id] || (S.p.w[it.id] = { s: 0, a: 0, e: 0, c: 0 });
-  s.a += 1; if (ok) { s.c += 1; s.s = Math.min(5, s.s + 1); S.p.xp += 10; } else { s.e += 1; s.s = Math.max(-10, s.s - 1); }
-  S.pending.push({ id: it.id, ok });
+  s.a += 1;
+  if (ok && !hinted) { s.c += 1; s.s = Math.min(5, s.s + 1); } else { s.e += 1; s.s = Math.max(-10, s.s - 1); }
+  S.p.xp += Math.round(10 * pts);
+  S.pending.push({ id: it.id, ok, pts, hint: hinted ? (h.rand ? 2 : 1) : 0 });
   flushPending();
   beep(ok);
   render();
   clearTimeout(S.timer);
-  S.timer = setTimeout(nextQuestion, ok ? 1500 : 5000);
+  S.timer = setTimeout(nextQuestion, ok ? (hinted ? 2500 : 1500) : 5000);
 }
 let flushing = false;
 async function flushPending() {
@@ -724,6 +758,22 @@ const A = {
     answerWith(given, matches(given, currentExpected()));
   },
   dontKnow() { answerWith('', false); },
+  hintFirst() {
+    const q = S.q; if (!q || q.fb) return; const it = q.items[q.i];
+    it.h = it.h || {}; it.h.first = true;
+    const inp = document.getElementById('answer'); if (inp) q.answer = inp.value;
+    render();
+  },
+  hintRand() {
+    const q = S.q; if (!q || q.fb) return; const it = q.items[q.i]; const m = hintModel(it); if (!m) return;
+    it.h = it.h || {};
+    const pool = m.letters.filter((i) => !(it.h.first && i === m.letters[0]));
+    const pick = [];
+    while (pick.length < m.nRand && pool.length) pick.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+    it.h.rand = pick;
+    const inp = document.getElementById('answer'); if (inp) q.answer = inp.value;
+    render();
+  },
   next() { nextQuestion(); },
   quitQuiz() { clearTimeout(S.timer); flushPending(); S.q = null; home(); },
   async toggleRev(el) {

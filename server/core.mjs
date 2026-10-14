@@ -220,12 +220,17 @@ export async function wordsFor(p, lang) {
 
 // ---------- Réponses et parties ----------
 
-export async function answer(p, { id, ok }) {
+// ok = mot réussi sans indice ; pts = points de la question (1, 0,5 ou 0,25 avec indice, 0 si faux) pour l'XP.
+// Une réponse juste obtenue avec un indice compte comme une erreur pour le mot : il reviendra plus souvent.
+export async function answer(p, { id, ok, pts, hint }) {
   if (typeof id !== 'string' || id.length > 40) throw new HttpError(400, 'mot invalide');
+  const points = pts === undefined ? (ok ? 1 : 0) : clamp(Number(pts) || 0, 0, 1);
   return update(pkey(p), (q) => {
     const st = q.w[id] || (q.w[id] = { s: 0, a: 0, e: 0, c: 0 });
     st.a += 1;
-    if (ok) { st.c += 1; st.s = clamp(st.s + 1, -10, 5); q.xp += 10; } else { st.e += 1; st.s = clamp(st.s - 1, -10, 5); }
+    if (ok && !hint) { st.c += 1; st.s = clamp(st.s + 1, -10, 5); } else { st.e += 1; st.s = clamp(st.s - 1, -10, 5); }
+    if (hint) st.h = (st.h || 0) + 1;
+    q.xp += Math.round(10 * points);
     st.f = st.f || nowIso();
     st.l = nowIso();
     return { stat: st, xp: q.xp };
@@ -249,7 +254,7 @@ function prevDay(day) {
 export async function finish(p, b) {
   const lang = LANGS.includes(b.lang) ? b.lang : p.lang;
   const total = clamp(parseInt(b.total, 10) || 0, 0, 50);
-  const score = clamp(parseInt(b.score, 10) || 0, 0, total);
+  const score = clamp(Math.round((parseFloat(b.score) || 0) * 4) / 4, 0, total);
   const mode = String(b.mode || 'custom').slice(0, 20);
   const day = /^\d{4}-\d{2}-\d{2}$/.test(b.day || '') ? b.day : nowIso().slice(0, 10);
   const levelWords = mode === 'my_level' ? Object.values((await baseDoc(lang)).words).filter((w) => w.status !== 'to_check') : [];
@@ -281,7 +286,7 @@ export async function finish(p, b) {
       q.lastDay = day;
     }
     const now = nowIso();
-    q.sessions.push({ at: now, day, lang, mode, level, score, total, lc, lesson: b.lesson || null, xp: score * 10 + bonus });
+    q.sessions.push({ at: now, day, lang, mode, level, score, total, lc, lesson: b.lesson || null, xp: Math.round(score * 10) + bonus });
     q.sessions = q.sessions.slice(-300);
     q.events = q.events.slice(-200);
     const newBadges = awardBadges(q, now);
