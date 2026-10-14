@@ -254,7 +254,7 @@ function hintModel(it) {
   const pre = m ? term.slice(0, m[0].length) : '';
   const chars = Array.from(term.slice(pre.length));
   const letters = chars.map((c, i) => (/\p{L}/u.test(c) ? i : -1)).filter((i) => i >= 0);
-  return { pre, chars, letters, nRand: letters.length >= 5 ? 2 : 1 };
+  return { pre, chars, letters };
 }
 function hintPoints(it) { const h = it.h || {}; return h.rand ? 0.25 : h.first ? 0.5 : 1; }
 function hintMask(it) {
@@ -286,11 +286,12 @@ function quizParts() {
   </div>`;
   let fb = '';
   const hm = hintModel(it); const h = it.h || {};
+  const used = !!(h.first || h.rand); const shortW = !!hm && hm.letters.length < 5;
   let btns;
   if (!q.fb) {
     btns = `<div class="hints">
-        <button class="btn3" data-a="hintFirst" data-keep="1" ${h.first || !hm ? 'disabled' : ''}>Indice : 1re lettre<small>½ point</small></button>
-        <button class="btn3" data-a="hintRand" data-keep="1" ${h.rand || !hm ? 'disabled' : ''}>Indice : ${hm && hm.nRand === 2 ? '2 lettres' : '1 lettre'} au hasard<small>¼ point</small></button>
+        <button class="btn3${h.first ? ' chosen' : ''}" data-a="hintFirst" data-keep="1" ${used || !hm ? 'disabled' : ''}>Indice : 1re lettre<small>${h.first ? 'choisi' : '½ point'}</small></button>
+        <button class="btn3${h.rand ? ' chosen' : ''}" data-a="hintRand" data-keep="1" ${used || !hm || shortW ? 'disabled' : ''}>Indice : 2 lettres au hasard<small>${h.rand ? 'choisi' : shortW ? 'mot trop court' : '¼ point'}</small></button>
       </div>
       <button class="btn blue" data-a="submit" data-keep="1">Valider</button>
       <button class="btn2" data-a="dontKnow" data-keep="1">Je ne sais pas</button>`;
@@ -760,17 +761,17 @@ const A = {
   dontKnow() { answerWith('', false); },
   hintFirst() {
     const q = S.q; if (!q || q.fb) return; const it = q.items[q.i];
-    it.h = it.h || {}; it.h.first = true;
+    if (it.h && (it.h.first || it.h.rand)) return;
+    it.h = { first: true };
     const inp = document.getElementById('answer'); if (inp) q.answer = inp.value;
     render();
   },
   hintRand() {
-    const q = S.q; if (!q || q.fb) return; const it = q.items[q.i]; const m = hintModel(it); if (!m) return;
-    it.h = it.h || {};
-    const pool = m.letters.filter((i) => !(it.h.first && i === m.letters[0]));
-    const pick = [];
-    while (pick.length < m.nRand && pool.length) pick.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
-    it.h.rand = pick;
+    const q = S.q; if (!q || q.fb) return; const it = q.items[q.i]; const m = hintModel(it);
+    if (!m || m.letters.length < 5 || (it.h && (it.h.first || it.h.rand))) return;
+    const pool = [...m.letters]; const pick = [];
+    while (pick.length < 2) pick.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+    it.h = { rand: pick };
     const inp = document.getElementById('answer'); if (inp) q.answer = inp.value;
     render();
   },
