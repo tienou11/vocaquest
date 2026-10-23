@@ -45,6 +45,7 @@ const icon = {
   trash: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A5578" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg>',
   check: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1E7A54" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>',
   cross: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#A3271B" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  search: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A5578" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>',
   medal: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14L7 22l5-3 5 3-1.5-8"/></svg>',
 };
 const starSvg = (on, size = 26) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${on ? '#F5B82E' : 'none'}" stroke="${on ? '#B9842A' : '#8A93AD'}" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>`;
@@ -91,6 +92,17 @@ function toast(msg, ms = 3800) {
   el.textContent = msg;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.remove(), ms);
+}
+async function copyText(text, okMsg) {
+  let ok = false;
+  try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); ok = true; } } catch { ok = false; }
+  if (!ok) {
+    const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+    try { ok = document.execCommand('copy'); } catch { ok = false; }
+    ta.remove();
+  }
+  toast(ok ? okMsg : 'Copie impossible : sélectionne le code à la main.');
+  return ok;
 }
 function fail(e) { toast(e && e.message ? e.message : 'Erreur inattendue'); }
 
@@ -177,6 +189,36 @@ SCREENS.gate = () => `<div class="screen" style="min-height:90vh;justify-content
   </details>
 </div>`;
 
+// ----- Traduire un mot (recherche dans la base) -----
+const PONS = { en: 'anglais', de: 'allemand', es: 'espagnol' };
+function transSearch(q, lang) {
+  const n = norm(q); if (n.length < 2) return [];
+  const out = [];
+  for (const w of S.words[lang] || []) {
+    let best = 9;
+    for (const x of [...w.t, ...w.f]) {
+      const v = norm(x);
+      const r = v === n ? 0 : v.startsWith(n) ? 1 : v.includes(n) ? 2 : 9;
+      if (r < best) best = r;
+    }
+    if (best < 9) out.push([best, w]);
+  }
+  return out.sort((a, b) => a[0] - b[0] || a[1].level - b[1].level).slice(0, 6).map((x) => x[1]);
+}
+function transResults() {
+  const q = (S.tq || '').trim(); if (norm(q).length < 2) return '';
+  const lang = S.tlang || S.p.lang; const L = LANGS[lang];
+  const res = transSearch(q, lang);
+  const chips = `<div class="row" style="gap:6px">${Object.entries(LANGS).map(([k, x]) => `<button class="pill sm ${k === lang ? 'on' : ''}" data-a="transLang" data-v="${k}">${x.code}</button>`).join('')}</div>`;
+  const dict = `https://fr.pons.com/traduction/${encodeURIComponent(PONS[lang] + '-français')}/${encodeURIComponent(q)}`;
+  if (!res.length) {
+    return `<div class="tres">${chips}<p class="small">« ${esc(q)} » n'est pas encore dans la base (${esc(L.adj)}).</p>
+      <div class="row wrap"><a class="pill sm" href="${dict}" target="_blank" rel="noopener">Chercher dans le dictionnaire PONS ↗</a><button class="pill sm" data-a="transAdd">+ Ajouter à une leçon</button></div></div>`;
+  }
+  return `<div class="tres">${chips}${res.map((w) => { const rv = !!(st(w.id) && st(w.id).r); return `<div class="trow"><div class="grow"><b>${esc(w.f.join(' / '))}</b> → <b class="tfor">${esc(w.t.join(' / '))}</b><div class="small">niveau ${w.level}${w.note ? ' · ' + esc(w.note) : ''}</div></div><button class="iconbtn" data-a="toggleRev" data-id="${esc(w.id)}" aria-pressed="${rv}" aria-label="À revoir">${starSvg(rv, 20)}</button></div>`; }).join('')}
+    <a class="small" href="${dict}" target="_blank" rel="noopener">Voir aussi dans le dictionnaire PONS ↗</a></div>`;
+}
+
 SCREENS.home = () => {
   const p = S.p; const lang = p.lang; const L = LANGS[lang]; const pr = prog(lang);
   const lw = levelWords(lang, pr.level); const disc = discovered(lw);
@@ -191,7 +233,11 @@ SCREENS.home = () => {
     </div>
     <div class="row" style="gap:6px"><span class="chip">${L.code}</span><span class="chip">Niv. ${pr.level}</span></div>
   </div>
-  ${S.newRc ? `<div class="banner">${icon.shield}<div class="grow"><b>Nouveau code de secours</b><br><span style="font-family:Fredoka,sans-serif;font-size:18px;letter-spacing:.06em">${esc(S.newRc)}</span><br>Note-le, l'ancien ne marche plus.</div><button data-a="ackNewRc">Noté</button></div>` : ''}
+  <div class="search" role="search">
+    <div class="row">${icon.search}<input id="tq" class="grow" aria-label="Traduire un mot" placeholder="Traduire un mot…" value="${esc(S.tq || '')}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button id="tqx" class="iconbtn sm" data-a="transClear" aria-label="Effacer" ${S.tq ? '' : 'hidden'}>✕</button></div>
+    <div id="tres">${transResults()}</div>
+  </div>
+  ${S.newRc ? `<div class="banner">${icon.shield}<div class="grow"><b>Nouveau code de secours</b><br><span style="font-family:Fredoka,sans-serif;font-size:18px;letter-spacing:.06em;user-select:all;-webkit-user-select:all">${esc(S.newRc)}</span><br>Note-le, l'ancien ne marche plus.</div><div style="display:flex;flex-direction:column;gap:6px"><button data-a="copyRc" data-v="${esc(S.newRc)}">Copier</button><button data-a="ackNewRc">Noté</button></div></div>` : ''}
   ${p.sessions.length && !p.rcAck && !S.newRc ? `<div class="banner">${icon.shield}<div class="grow"><b>Protège ta progression</b><br>Note ton code de secours.</div><button data-a="nav" data-to="profile">Voir</button></div>` : ''}
   ${(p.badgeNews || []).length ? `<div class="banner">${icon.medal}<div class="grow"><b>Tu n'as pas joué depuis un moment</b><br>Badge perdu : ${p.badgeNews.map((id) => '« ' + esc(badgeName(id)) + ' »').join(', ')}. Rejoue pour le regagner !</div><button data-a="ackBadges">OK</button></div>` : (() => { const r = badgeRisk(); return r ? `<div class="banner">${icon.medal}<div class="grow"><b>Garde ton badge « ${esc(badgeName(r.id))} »</b><br>Joue avant le ${r.date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}${r.daysLeft <= 1 ? ' (demain au plus tard)' : ''}.</div></div>` : ''; })()}
   ${S.noStorage ? '<div class="banner"><div class="grow">Ton navigateur bloque l\'enregistrement (navigation privée ?). Ton profil sera perdu à la fermeture.</div></div>' : ''}
@@ -571,7 +617,7 @@ SCREENS.profile = () => {
   <button class="opt" style="min-height:50px" data-a="toggleSound">Son : <b>${p.sound ? 'activé' : 'coupé'}</b></button>
   <div class="banner" style="flex-direction:column;align-items:flex-start;gap:6px">
     <b>Mon code de secours</b>
-    <span style="font-family:Fredoka,sans-serif;font-weight:600;font-size:24px;letter-spacing:.08em">${esc(p.rc)}</span>
+    <div class="row" style="width:100%"><span class="grow" style="font-family:Fredoka,sans-serif;font-weight:600;font-size:24px;letter-spacing:.08em;user-select:all;-webkit-user-select:all">${esc(p.rc)}</span><button data-a="copyRc">Copier</button></div>
     <span>Note-le ou prends-le en photo : il permet de retrouver ton profil si tu perds ton appareil.</span>
     ${p.rcAck ? '<span class="tag">Noté ✓</span>' : '<button data-a="ackRc">C\'est noté</button>'}
   </div>
@@ -723,6 +769,15 @@ const A = {
   nav(el) { if (el.dataset.to === 'profile') { S.tmp.name = null; S.transfer = null; } go(el.dataset.to); },
   ackNewRc() { S.newRc = null; api('/me', { body: { rcAck: true } }).then((r) => { S.p = r.profile; render(); }).catch(fail); render(); },
   async ackBadges() { try { const r = await api('/me', { body: { badgeAck: true } }); S.p = r.profile; render(); } catch (e) { fail(e); } },
+  async transLang(el) { S.tlang = el.dataset.v; try { await withLoading(() => loadWords(S.tlang)); } catch (e) { fail(e); } render(); },
+  transClear() { S.tq = ''; render(); },
+  async transAdd() {
+    const q = (S.tq || '').trim(); const lang = S.tlang || S.p.lang;
+    S.al = { name: `Leçon du ${frDate(today())}`, lang, date: today(), rows: [{ ...emptyRow(), f: q }], pasted: '', copied: false, parseError: false };
+    try { await withLoading(() => loadWords(lang)); } catch { /* sans détection des doublons */ }
+    go('verify');
+  },
+  async copyRc(el) { await copyText((el && el.dataset.v) || S.p.rc, 'Code de secours copié.'); },
   async ackRc() { try { const r = await api('/me', { body: { rcAck: true } }); S.p = r.profile; render(); } catch (e) { fail(e); } },
   playLevel() {
     if (!S.p.setup) { S.tmp = { lang: S.p.lang, level: prog(S.p.lang).level, name: S.p.name }; go('setup'); return; }
@@ -945,6 +1000,7 @@ document.addEventListener('input', (e) => {
   const el = e.target;
   if (el.dataset.bind) setPath(el.dataset.bind, el.value);
   if (el.dataset.row != null && S.al) S.al.rows[Number(el.dataset.row)][el.dataset.field] = el.value;
+  if (el.id === 'tq') { S.tq = el.value; const r = document.getElementById('tres'); if (r) r.innerHTML = transResults(); const x = document.getElementById('tqx'); if (x) x.hidden = !S.tq; return; }
   if (el.id === 'answer' && S.q) { if (S.q.fb) el.value = S.q.given; else S.q.answer = el.value; }
 });
 document.addEventListener('change', (e) => {

@@ -6,6 +6,7 @@
   --radius: 20px;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: #EEF3FB; color: var(--ink); font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 16px; line-height: 1.4; }
 button, input, select, textarea { font-family: inherit; font-size: 16px; color: inherit; }
@@ -122,3 +123,13 @@ table.mini th, table.mini td { text-align: left; padding: 6px 4px; border-bottom
 .hints .btn3 small { font-size: 12px; font-weight: 700; color: var(--muted); }
 .hints .btn3:disabled { opacity: .45; }
 .hints .btn3.chosen:disabled { opacity: 1; border-style: solid; border-color: var(--blue); background: #E3E9FF; }
+.search { background: #fff; border: 2px solid var(--line2); border-radius: 18px; padding: 8px 12px; display: flex; flex-direction: column; gap: 8px; }
+.search:focus-within { border-color: #9DB3FF; }
+.search input { border: none; outline: none; font-size: 17px; min-height: 40px; background: transparent; min-width: 0; }
+.iconbtn.sm { width: 36px; height: 36px; font-size: 14px; }
+.tres { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); padding-top: 8px; }
+.trow { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.trow:last-of-type { border-bottom: none; }
+.trow .tfor { color: var(--blue-d); }
+.pill.sm { min-height: 36px; font-size: 13px; padding: 0 12px; display: inline-flex; align-items: center; text-decoration: none; color: var(--ink); }
+.pill.sm.on { color: #fff; }
