@@ -67,9 +67,11 @@ async function api(path, opts = {}) {
   } catch {
     throw new Error('Pas de connexion Internet. Réessaie dans un instant.');
   }
-  if (r.status === 401 && S.token && !opts.noLogout) { loggedOut(); throw new Error('Ce profil a été déplacé sur un autre appareil.'); }
   const ct = r.headers.get('content-type') || '';
-  const data = ct.includes('json') ? await r.json() : await r.text();
+  let data;
+  try { data = ct.includes('json') ? await r.json() : await r.text(); } catch { data = null; }
+  // Déconnexion seulement si le serveur confirme que cet appareil n'est plus rattaché au profil.
+  if (r.status === 401 && data && data.code === 'auth' && S.token && !opts.noLogout) { loggedOut(); throw new Error('Ce profil a été déplacé sur un autre appareil.'); }
   if (!r.ok) throw new Error((data && data.error) || 'Erreur inattendue');
   return data;
 }

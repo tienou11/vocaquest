@@ -32,30 +32,30 @@ function fsKV(dir) {
   })();
 }
 
+// Netlify Blobs : le magasin est recréé à chaque opération, car le jeton d'accès fourni par
+// Netlify est propre à chaque requête. Un magasin gardé en mémoire d'une requête à l'autre
+// finit par échouer (« Failed to decode token »).
 async function blobsKV() {
   const { getStore } = await import('@netlify/blobs');
-  const s = getStore({ name: 'vocaquest', consistency: 'strong' });
+  const st = () => getStore({ name: 'vocaquest', consistency: 'strong' });
   return {
-    async get(k) { return await s.get(k, { type: 'json' }); },
+    async get(k) { return await st().get(k, { type: 'json' }); },
     async getE(k) {
-      const r = await s.getWithMetadata(k, { type: 'json' });
+      const r = await st().getWithMetadata(k, { type: 'json' });
       return r ? { data: r.data, etag: r.etag } : null;
     },
     async set(k, v, opts = {}) {
-      const r = await s.setJSON(k, v, opts);
+      const r = await st().setJSON(k, v, opts);
       return !(r && r.modified === false);
     },
-    async del(k) { await s.delete(k); },
+    async del(k) { await st().delete(k); },
     async keys(prefix) {
-      const { blobs } = await s.list({ prefix });
+      const { blobs } = await st().list({ prefix });
       return blobs.map((b) => b.key);
     },
   };
 }
 
-// Netlify Blobs : le magasin est recréé à chaque appel. Le jeton d'accès fourni par Netlify
-// change d'une requête à l'autre et expire : un magasin gardé en mémoire entre deux requêtes
-// finit par échouer (« Failed to decode token » / « Token expired »).
 export async function kv() {
   if (process.env.LOCAL_STORE_DIR) {
     if (!_kv) _kv = await fsKV(process.env.LOCAL_STORE_DIR);

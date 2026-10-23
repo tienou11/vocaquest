@@ -45,10 +45,10 @@ export async function handleApi(req) {
     const out = await route({ req, body, q, p });
     return out instanceof Response ? out : json(out);
   } catch (e) {
-    // Seules nos erreurs prévues gardent leur code : une erreur technique (Netlify Blobs…)
-    // devient 500, sinon un 401 venu du stockage déconnecterait l'appareil.
-    const status = (e instanceof C.HttpError || e.expose) && e.status ? e.status : 500;
+    // Seules nos propres erreurs sont transmises telles quelles ; toute autre (stockage, réseau) devient 500,
+    // pour ne jamais être confondue avec une déconnexion.
+    const status = e && e.expose && e.status ? e.status : 500;
     if (status >= 500) console.error(e);
-    return json({ error: status >= 500 ? 'Erreur du serveur, réessaie dans un instant.' : e.message }, status);
+    return json({ error: status >= 500 ? 'Erreur du serveur, réessaie dans un instant.' : e.message, code: e && e.expose ? e.code : undefined }, status);
   }
 }

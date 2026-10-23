@@ -10,7 +10,7 @@ export const LANGS = ['en', 'de', 'es'];
 const TYPES = ['nom', 'verbe', 'adjectif', 'adverbe', 'expression', ''];
 
 export class HttpError extends Error {
-  constructor(status, msg) { super(msg); this.status = status; }
+  constructor(status, msg, code) { super(msg); this.status = status; this.code = code; this.expose = true; }
 }
 
 const sha = (s) => createHash('sha256').update(s).digest('hex');
@@ -149,12 +149,12 @@ export async function createProfile({ invite }) {
 export async function auth(req) {
   const hdr = req.headers.get('authorization') || '';
   const token = hdr.startsWith('Bearer ') ? hdr.slice(7).trim() : '';
-  if (!token) throw new HttpError(401, 'non connecté');
+  if (!token) throw new HttpError(401, 'non connecté', 'auth');
   const s = await kv();
   const dev = await s.get(`d/${sha(token)}`);
-  if (!dev) throw new HttpError(401, 'appareil inconnu');
+  if (!dev) throw new HttpError(401, 'appareil inconnu', 'auth');
   const p = await s.get(`p/${dev.pid}`);
-  if (!p || p.dev !== sha(token)) throw new HttpError(401, 'appareil remplacé');
+  if (!p || p.dev !== sha(token)) throw new HttpError(401, 'appareil remplacé', 'auth');
   return p;
 }
 
