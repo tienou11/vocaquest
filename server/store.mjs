@@ -53,9 +53,15 @@ async function blobsKV() {
   };
 }
 
+// Netlify Blobs : le magasin est recréé à chaque appel. Le jeton d'accès fourni par Netlify
+// change d'une requête à l'autre et expire : un magasin gardé en mémoire entre deux requêtes
+// finit par échouer (« Failed to decode token » / « Token expired »).
 export async function kv() {
-  if (!_kv) _kv = process.env.LOCAL_STORE_DIR ? await fsKV(process.env.LOCAL_STORE_DIR) : await blobsKV();
-  return _kv;
+  if (process.env.LOCAL_STORE_DIR) {
+    if (!_kv) _kv = await fsKV(process.env.LOCAL_STORE_DIR);
+    return _kv;
+  }
+  return blobsKV();
 }
 
 // Lecture-modification-écriture protégée par etag (plusieurs essais en cas de conflit).
@@ -64,11 +70,11 @@ export async function update(key, fn, init) {
   for (let i = 0; i < 6; i++) {
     const cur = await s.getE(key);
     let data = cur ? cur.data : init ? init() : null;
-    if (data == null) { const e = new Error('introuvable'); e.status = 404; throw e; }
+    if (data == null) { const e = new Error('introuvable'); e.status = 404; e.expose = true; throw e; }
     const out = await fn(data);
     const ok = cur ? await s.set(key, data, { onlyIfMatch: cur.etag }) : await s.set(key, data, { onlyIfNew: true });
     if (ok) return out === undefined ? data : out;
     await new Promise((r) => setTimeout(r, 40 * (i + 1)));
   }
-  const e = new Error('conflit, réessaie'); e.status = 409; throw e;
+  const e = new Error('conflit, réessaie'); e.status = 409; e.expose = true; throw e;
 }
